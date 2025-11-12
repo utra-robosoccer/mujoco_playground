@@ -1,0 +1,18 @@
+<body name="robot" pos="-5 0 0.1">
+  <freejoint/>
+  <geom type="box" size="0.25 0.18 0.08" mass="2.0" rgba="0.2 0.2 0.8 1"/>
+</body>
+
+<!--this is the grass friction pendulum thingy-->
+<!--<mujoco>-->
+<!--    <visual>-->
+<!--        <headlight ambient="1 1 1"/>-->
+<!--    </visual>-->
+<!--    <worldbody>-->
+<!--        <geom type="plane" rgba="0 1 0 0.3" size="1 1 1" condim="3" solref="-100 -0.001" friction="0.1" priority="2" solimp="0.9 0.99 0.06" pos="0 0 -0.9" />&lt;!&ndash; The plane has higher priority &ndash;&gt;-->
+<!--            <body name="b1">-->
+<!--                <joint type="hinge" name="j1" axis="0 1 0" />-->
+<!--                <geom name="g1" type="box" size="0.1 0.1 0.1" pos="1 0 0" mass="1" />-->
+<!--            </body>-->
+<!--    </worldbody>-->
+<!--</mujoco>-->
