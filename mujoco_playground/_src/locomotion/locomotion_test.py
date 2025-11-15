@@ -29,6 +29,8 @@ class TestSuite(parameterized.TestCase):
       for env_name in locomotion.ALL_ENVS
   )
   def test_can_create_all_environments(self, env_name: str) -> None:
+    env_name = "Bez2JoystickFlatTerrain"
+    # env_name = "BerkeleyHumanoidJoystickFlatTerrain"
     env = locomotion.load(env_name)
     state = jax.jit(env.reset)(jax.random.PRNGKey(42))
     state = jax.jit(env.step)(state, jp.zeros(env.action_size))

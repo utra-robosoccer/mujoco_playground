@@ -33,6 +33,7 @@ dependencies = [
     "mujoco-mjx>=3.3.6.dev",
     "mujoco>=3.3.6.dev",
     "orbax-checkpoint>=0.11.22",
+    "pymeshlab>=2025.7",
     "tqdm",
 ]
 keywords = ["mjx", "mujoco", "sim2real", "reinforcement learning"]

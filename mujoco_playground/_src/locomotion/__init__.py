@@ -41,6 +41,8 @@ from mujoco_playground._src.locomotion.spot import joystick_gait_tracking as spo
 from mujoco_playground._src.locomotion.t1 import joystick as t1_joystick
 from mujoco_playground._src.locomotion.t1 import randomize as t1_randomize
 
+from mujoco_playground._src.locomotion.bez2 import joystick as bez2_joystick
+from mujoco_playground._src.locomotion.bez2 import randomize as bez2_randomize
 
 _envs = {
     "ApolloJoystickFlatTerrain": functools.partial(
@@ -52,6 +54,12 @@ _envs = {
     ),
     "BerkeleyHumanoidJoystickRoughTerrain": functools.partial(
         berkeley_humanoid_joystick.Joystick, task="rough_terrain"
+    ),
+    "Bez2JoystickFlatTerrain": functools.partial(
+        bez2_joystick.Joystick, task="flat_terrain"
+    ),
+    "Bez2JoystickRoughTerrain": functools.partial(
+        bez2_joystick.Joystick, task="rough_terrain"
     ),
     "G1JoystickFlatTerrain": functools.partial(
         g1_joystick.Joystick, task="flat_terrain"
@@ -95,6 +103,12 @@ _cfgs = {
     "BerkeleyHumanoidJoystickRoughTerrain": (
         berkeley_humanoid_joystick.default_config
     ),
+    "Bez2JoystickFlatTerrain": (
+        bez2_joystick.default_config
+    ),
+    "Bez2JoystickRoughTerrain": (
+        bez2_joystick.default_config
+    ),
     "G1JoystickFlatTerrain": g1_joystick.default_config,
     "G1JoystickRoughTerrain": g1_joystick.default_config,
     "Go1JoystickFlatTerrain": go1_joystick.default_config,
@@ -118,6 +132,12 @@ _randomizer = {
     ),
     "BerkeleyHumanoidJoystickRoughTerrain": (
         berkeley_humanoid_randomize.domain_randomize
+    ),
+    "Bez2JoystickFlatTerrain": (
+        bez2_randomize.domain_randomize
+    ),
+    "Bez2JoystickRoughTerrain": (
+        bez2_randomize.domain_randomize
     ),
     "G1JoystickFlatTerrain": g1_randomize.domain_randomize,
     "G1JoystickRoughTerrain": g1_randomize.domain_randomize,

@@ -43,10 +43,11 @@ pip install playground
 2. [Install uv](https://docs.astral.sh/uv/getting-started/installation/), a faster alternative to `pip`
 3. Create a virtual environment: `uv venv --python 3.11`
 4. Activate it: `source .venv/bin/activate`
-5. Install CUDA 12 jax: `uv pip install -U "jax[cuda12]"`
+5. Install CUDA 12 jax: `uv pip install -U "jax[cuda12]"` Make sure its cuda 12, 13 is not compatably yet
     * Verify GPU backend: `python -c "import jax; print(jax.default_backend())"` should print gpu
 6. Install playground: `uv pip install -e ".[all]"`
-7. Verify installation (and download Menagerie): `python -c "import mujoco_playground"`
+7. Verify installation (and download Menagerie): `python -c "import mujoco_playground"` 
+8. TODO add a download mengaerie cmd
 
 #### Madrona-MJX (optional)
 
