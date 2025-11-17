@@ -1,0 +1,112 @@
+cd ~/ros2_ws/src/mujoco_playground/mujoco_playground/_src/locomotion/bez2
+mjx-testspeed --mjcf=xmls/scene_mjx_feetonly_flat_terrain.xml --base_path=.
+mjx-testspeed --mjcf=xmls/scene_mjx_fullcollisions_flat_terrain.xml --base_path=.
+ ~/mujoco-3.1.1/bin/compile robot.urdf robot2.xml
+python mujoco_playground/experimental/sim2sim/play_bez2_joystick.py
+
+ berk
+  Total JIT time: 31.45 s
+ Total simulation time: 1.16 s
+ Total steps per second: 880664
+ Total realtime factor: 1761.33 x
+ Total time per step: 1.14 µs
+
+berk rough
+ Total JIT time: 36.72 s
+ Total simulation time: 4.04 s
+ Total steps per second: 253625
+ Total realtime factor: 507.25 x
+ Total time per step: 3.94 µs
+
+ g1
+ Total JIT time: 49.57 s
+ Total simulation time: 1.84 s
+ Total steps per second: 556957
+ Total realtime factor: 1113.91 x
+ Total time per step: 1.80 µs
+
+ bez2 only head
+
+ Total JIT time: 21.88 s
+ Total simulation time: 5.00 s
+ Total steps per second: 204634
+ Total realtime factor: 409.27 x
+ Total time per step: 4.89 µs
+
+bez2 only feet  box
+ Total JIT time: 21.48 s
+ Total simulation time: 0.99 s
+ Total steps per second: 1038202
+ Total realtime factor: 2076.40 x
+ Total time per step: 0.96 µs
+
+ bez2  only feet mesh
+ Total JIT time: 32.22 s
+ Total simulation time: 1.13 s
+ Total steps per second: 906745
+ Total realtime factor: 1813.49 x
+ Total time per step: 1.10 µs
+
+  bez2  only feet convex mesh
+ Total JIT time: 32.22 s
+ Total simulation time: 1.13 s
+ Total steps per second: 906745
+ Total realtime factor: 1813.49 x
+ Total time per step: 1.10 µs
+
+  bez2  only feet convex mesh rough
+ Total JIT time: 43.87 s
+ Total simulation time: 11.62 s
+ Total steps per second: 88137
+ Total realtime factor: 176.27 x
+ Total time per step: 11.35 µs
+
+  bez2  only feet box rough
+ Total JIT time: 43.87 s
+ Total simulation time: 11.62 s
+ Total steps per second: 88137
+ Total realtime factor: 176.27 x
+ Total time per step: 11.35 µs
+
+ go1 feet only
+
+ Total JIT time: 16.25 s
+ Total simulation time: 0.64 s
+ Total steps per second: 1608187
+ Total realtime factor: 6432.75 x
+ Total time per step: 0.62 µs
+
+ go1 scene_mjx_fullcollisions_flat_terrain.xml
+
+  Total JIT time: 32.26 s
+ Total simulation time: 3.62 s
+ Total steps per second: 282638
+ Total realtime factor: 1130.55 x
+ Total time per step: 3.54 µs
+
+go1 scene_mjx_flat_terrain.xml
+
+
+ Total JIT time: 16.26 s
+ Total simulation time: 0.63 s
+ Total steps per second: 1627415
+ Total realtime factor: 6509.66 x
+ Total time per step: 0.61 µs
+
+ op3 feet only
+
+ Total JIT time: 33.70 s
+ Total simulation time: 1.38 s
+ Total steps per second: 740388
+ Total realtime factor: 2961.55 x
+ Total time per step: 1.35 µs
+
+bez2 dof 20
+
+time to jit: 0:02:13.416952
+time to train: 0:53:36.504378
+
+bez2 dof 12
+
+time to jit: 0:02:13.416952
+time to train: 0:53:36.504378

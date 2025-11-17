@@ -32,9 +32,13 @@
       <material name="silver_default"/>
     </visual>
     <collision>
-      <origin rpy="0 0 0" xyz="0 0 0"/>
+<!--      <origin rpy="0 0 0" xyz="0 0 0"/>-->
+<!--      <geometry>-->
+<!--        <mesh filename="base_link.stl" scale="0.001 0.001 0.001"/>-->
+<!--      </geometry>-->
+        <origin rpy="0.00000 0.00000 0.00000" xyz="-0.02000 0.00000 -0.01100"/>
       <geometry>
-        <mesh filename="base_link.stl" scale="0.001 0.001 0.001"/>
+        <box size="0.18229 0.17215 0.16665"/>
       </geometry>
     </collision>
   </link>

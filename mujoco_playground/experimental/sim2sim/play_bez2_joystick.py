@@ -104,7 +104,8 @@ def load_callback(model=None, data=None):
 
   model = mujoco.MjModel.from_xml_path(
       # bez2_constants.FEET_ONLY_ROUGH_TERRAIN_XML.as_posix(),
-      bez2_constants.FEET_ONLY_FLAT_TERRAIN_XML.as_posix(),
+      # bez2_constants.FEET_ONLY_FLAT_TERRAIN_XML.as_posix(),
+      bez2_constants.FULL_COLLISIONS_FLAT_TERRAIN_XML.as_posix(),
       assets=get_assets(),
   )
   data = mujoco.MjData(model)

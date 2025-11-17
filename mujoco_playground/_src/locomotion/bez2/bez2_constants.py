@@ -25,8 +25,9 @@ FEET_ONLY_FLAT_TERRAIN_XML = (
 FEET_ONLY_ROUGH_TERRAIN_XML = (
     ROOT_PATH / "xmls" / "scene_mjx_feetonly_rough_terrain.xml"
 )
-FEET_ONLY_XML = ROOT_PATH / "xmls" / "scene_mjx_feetonly_flat_terrain.xml"
-
+FULL_COLLISIONS_FLAT_TERRAIN_XML = (
+    ROOT_PATH / "xmls" / "scene_mjx_fullcollisions_flat_terrain.xml"
+)
 
 def task_to_xml(task_name: str) -> epath.Path:
   return {
