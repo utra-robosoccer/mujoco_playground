@@ -32,7 +32,9 @@ dependencies = [
     "ml_collections",
     "mujoco-mjx>=3.3.6.dev",
     "mujoco>=3.3.6.dev",
+    "onnxruntime>=1.23.2",
     "orbax-checkpoint>=0.11.22",
+    "protobuf>=6.33.1",
     "pymeshlab>=2025.7",
     "tqdm",
 ]

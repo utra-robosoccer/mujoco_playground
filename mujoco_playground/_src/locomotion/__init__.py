@@ -40,7 +40,6 @@ from mujoco_playground._src.locomotion.spot import joystick as spot_joystick
 from mujoco_playground._src.locomotion.spot import joystick_gait_tracking as spot_joystick_gait_tracking
 from mujoco_playground._src.locomotion.t1 import joystick as t1_joystick
 from mujoco_playground._src.locomotion.t1 import randomize as t1_randomize
-
 from mujoco_playground._src.locomotion.bez2 import joystick as bez2_joystick
 from mujoco_playground._src.locomotion.bez2 import randomize as bez2_randomize
 
@@ -55,6 +54,7 @@ _envs = {
     "BerkeleyHumanoidJoystickRoughTerrain": functools.partial(
         berkeley_humanoid_joystick.Joystick, task="rough_terrain"
     ),
+    # "Bez2JoystickFlatTerrain": bez2_joystick.Joystick,
     "Bez2JoystickFlatTerrain": functools.partial(
         bez2_joystick.Joystick, task="flat_terrain"
     ),

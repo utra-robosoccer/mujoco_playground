@@ -1,5 +1,7 @@
 <mujoco model="bez2 feetonly rough terrain scene">
   <include file="bez2_mjx_feetonly.xml"/>
+<!--    <compiler meshdir="meshes/" angle="radian"  />-->
+    <compiler meshdir="meshes/" angle="radian"  assetdir="../assets/"/>
 
   <statistic center="0 0 0.1" extent="0.8" meansize="0.04"/>
 
@@ -13,9 +15,9 @@
 
   <asset>
     <!-- https://polyhaven.com/a/rock_face -->
-    <texture type="2d" name="groundplane" file="assets/rocky_texture.png"/>
+    <texture type="2d" name="groundplane" file="rocky_texture.png"/>
     <material name="groundplane" texture="groundplane" texuniform="true" texrepeat="5 5" reflectance=".8"/>
-    <hfield name="hfield" file="assets/hfield.png" size="10 10 .05 1.0"/>
+    <hfield name="hfield" file="hfield.png" size="10 10 .05 1.0"/>
   </asset>
 
   <worldbody>
@@ -28,20 +30,17 @@
    <keyframe>
     <key name="home"
       qpos="
-        0.06385 -0.00288 0.34890
-        0.99113 0.00180 0.13286 0.00162
-        -0.00000 0.00084
-        -0.44494 0.00001 2.32095
-        -0.01755 0.05533 1.04399 -1.58355 0.80473 -0.06774
-        -0.44494 -0.00004 2.32091
-        -0.00999 0.04209 1.04002 -1.59023 0.81671 -0.04648
+        0.01006381 -0.00524273  0.3554218   0.99986568  0.00176925  0.01470567
+ -0.0070161  -0.02879865  0.06594161  0.88049179 -1.53157813  0.6816981
+ -0.07176462 -0.01780979  0.05104029  0.86242893 -1.540901    0.70639566
+ -0.05184008
+
     "
     ctrl="
-    -0.00000 0.00084
-        -0.44494 0.00001 2.32095
-        -0.01755 0.05533 1.04399 -1.58355 0.80473 -0.06774
-        -0.44494 -0.00004 2.32091
-        -0.00999 0.04209 1.04002 -1.59023 0.81671 -0.04648
+
+   -0.02879865  0.06594161  0.88049179 -1.53157813  0.6816981
+ -0.07176462 -0.01780979  0.05104029  0.86242893 -1.540901    0.70639566
+ -0.05184008
     "/>
   </keyframe>
 </mujoco>

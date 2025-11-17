@@ -59,9 +59,11 @@ def default_config() -> config_dict.ConfigDict:
               orientation=-1.0,
               base_height=0.0,
               # Energy related rewards.
-              torques=-2.5e-5,
-              action_rate=-0.01,
-              energy=-1.e-3,
+              torques=0.0,
+              action_rate=0.0,
+              energy=0.0,
+              dof_acc=0.0,
+              dof_vel=0.0,
               # Feet related rewards.
               feet_clearance=0.0,
               feet_air_time=2.0,
@@ -70,29 +72,31 @@ def default_config() -> config_dict.ConfigDict:
               feet_phase=1.0,
               # Other rewards.
               stand_still=0.0,
-              alive=0.0,
-              termination=-1.0,
+              alive=0.25,
+              termination=0.0,
               # Pose related rewards.
               joint_deviation_knee=-0.1,
-              joint_deviation_hip=-0.25,
+              joint_deviation_hip=-0.1,
               dof_pos_limits=-1.0,
               pose=-1.0,
+              feet_distance=-1.0,
+              collision=-1.0,
           ),
-          tracking_sigma=0.5,
-          max_foot_height=0.1,
-          base_height_target= 0.35542180088712744 #0.35542180088712744, 0.243584
+          tracking_sigma=0.25,
+          max_foot_height=0.12,
+          base_height_target=0.35488, #0.35517319429798605
       ),
       push_config=config_dict.create(
           enable=True,
           interval_range=[5.0, 10.0],
-          magnitude_range=[0.05, 0.8],
+          magnitude_range=[0.1, 1.0],
       ),
       lin_vel_x=[-1.0, 1.0],
-      lin_vel_y=[-1.0, 1.0],
+      lin_vel_y=[-0.8, 0.8],
       ang_vel_yaw=[-1.0, 1.0],
       impl="jax",
       nconmax=8 * 8192,
-      njmax=29 * 2 + 8 * 4,
+      njmax=80,
   )
 
 
@@ -107,7 +111,7 @@ class Joystick(bez2_base.Bez2Env):
   ):
     if task.startswith("rough"):
       config.nconmax = 100 * 8192
-      config.njmax = 29 * 2 + 100 * 4
+      config.njmax = 500
     super().__init__(
         xml_path=consts.task_to_xml(task).as_posix(),
         config=config,
@@ -120,9 +124,7 @@ class Joystick(bez2_base.Bez2Env):
     self._default_pose = jp.array(self._mj_model.keyframe("home").qpos[7:])
 
     # Note: First joint is freejoint.
-    # self._lowers, self._uppers = self.mj_model.jnt_range[1:].T
-    self._lowers = self._mj_model.actuator_ctrlrange[:, 0]
-    self._uppers = self._mj_model.actuator_ctrlrange[:, 1]
+    self._lowers, self._uppers = self.mj_model.jnt_range[1:].T
     c = (self._lowers + self._uppers) / 2
     r = self._uppers - self._lowers
     self._soft_lowers = c - 0.5 * r * self._config.soft_joint_pos_limit_factor
@@ -144,18 +146,11 @@ class Joystick(bez2_base.Bez2Env):
 
     # fmt: off
     self._weights = jp.array([
-        # 0.1, 0.1,  # Head.
-        # 0.1, 1.0, 1.0,  # Left arm.
-        1.0, 1.0, 0.01, 0.01, 1.0, 1.0,  # Left leg.
-        # 0.1, 1.0, 1.0,  # Right arm.
-        1.0, 1.0, 0.01, 0.01, 1.0, 1.0,  # Right leg.
-
-        # 0.0, 0.0,  # Head.
-        # 0.0, 0.0, 0.0,  # Left arm.
-        # 0.0, 0.0, 0.0,  # Right arm.
-        # 1.0, 1.0, 0.01, 0.01, 1.0, 1.0,  # Left leg.
-        #
-        # 1.0, 1.0, 0.01, 0.01, 1.0, 1.0,  # Right leg.
+        1.0, 1.0,  # Head.
+        1.0, 1.0, 1.0,  # Left arm.
+        1.0, 1.0, 1.0, 1.0, 1.0, 1.0,  # Left leg.
+        1.0, 1.0, 1.0,  # Right arm.
+        1.0, 1.0, 1.0, 1.0, 1.0, 1.0,  # Right leg.
     ])
     # fmt: on
 
@@ -208,7 +203,7 @@ class Joystick(bez2_base.Bez2Env):
     # qpos[7:]=*U(0.5, 1.5)
     rng, key = jax.random.split(rng)
     qpos = qpos.at[7:].set(
-        qpos[7:] * jax.random.uniform(key, (12,), minval=0.5, maxval=1.5)
+        qpos[7:] * jax.random.uniform(key, (20,), minval=0.5, maxval=1.5)
     )
 
     # d(xyzrpy)=U(-0.5, 0.5)
@@ -228,9 +223,9 @@ class Joystick(bez2_base.Bez2Env):
     )
     data = mjx.forward(self.mjx_model, data)
 
-    # Phase, freq=U(1.0, 1.5)
+    # Phase, freq=U(1.25, 1.75)
     rng, key = jax.random.split(rng)
-    gait_freq = jax.random.uniform(key, (1,), minval=1.25, maxval=1.5)
+    gait_freq = jax.random.uniform(key, (1,), minval=1.25, maxval=1.75)
     phase_dt = 2 * jp.pi * self.dt * gait_freq
     phase = jp.array([0, jp.pi])
 
@@ -263,6 +258,8 @@ class Joystick(bez2_base.Bez2Env):
         "push": jp.array([0.0, 0.0]),
         "push_step": 0,
         "push_interval_steps": push_interval_steps,
+        "filtered_linvel": jp.zeros(3),
+        "filtered_angvel": jp.zeros(3),
     }
 
     metrics = {}
@@ -306,6 +303,14 @@ class Joystick(bez2_base.Bez2Env):
     )
     state.info["motor_targets"] = motor_targets
 
+    linvel = self.get_local_linvel(data)
+    state.info["filtered_linvel"] = (
+        linvel * 1.0 + state.info["filtered_linvel"] * 0.0
+    )
+    angvel = self.get_gyro(data)
+    state.info["filtered_angvel"] = (
+        angvel * 1.0 + state.info["filtered_angvel"] * 0.0
+    )
     contact = jp.array([
         data.sensordata[self._mj_model.sensor_adr[sensor_id]] > 0
         for sensor_id in self._feet_floor_found_sensor
@@ -323,7 +328,6 @@ class Joystick(bez2_base.Bez2Env):
     rewards = self._get_reward(
         data, action, state.info, state.metrics, done, first_contact, contact
     )
-
     rewards = {
         k: v * self._config.reward_config.scales[k] for k, v in rewards.items()
     }
@@ -334,6 +338,11 @@ class Joystick(bez2_base.Bez2Env):
     state.info["push_step"] += 1
     phase_tp1 = state.info["phase"] + state.info["phase_dt"]
     state.info["phase"] = jp.fmod(phase_tp1 + jp.pi, 2 * jp.pi) - jp.pi
+    state.info["phase"] = jp.where(
+        jp.linalg.norm(state.info["command"]) > 0.01,
+        state.info["phase"],
+        jp.ones(2) * jp.pi,
+    )
     state.info["last_last_act"] = state.info["last_act"]
     state.info["last_act"] = action
     state.info["rng"], cmd_rng = jax.random.split(state.info["rng"])
@@ -353,29 +362,15 @@ class Joystick(bez2_base.Bez2Env):
     for k, v in rewards.items():
       state.metrics[f"reward/{k}"] = v
     state.metrics["swing_peak"] = jp.mean(state.info["swing_peak"])
-    # jax.debug.print(
-    #     "rew: {r}, done: {d}",
-    #     r=rewards,
-    #     d=done,
-    # )
 
-    # print(f"rew: {reward}")
-    # print(f"done: {done.astype(reward.dtype)}")
     done = done.astype(reward.dtype)
     state = state.replace(data=data, obs=obs, reward=reward, done=done)
     return state
 
   def _get_termination(self, data: mjx.Data) -> jax.Array:
-    # fall_termination = self.get_gravity(data)[-1] < 0.0
-    # contact_termination = data.sensordata[
-    #                           self._mj_model.sensor_adr[self._right_foot_left_foot_found_sensor]
-    #                       ] > 0
-    # return (
-    #     fall_termination | contact_termination | jp.isnan(data.qpos).any() | jp.isnan(data.qvel).any()
-    # )
     fall_termination = self.get_gravity(data)[-1] < 0.0
     return (
-            fall_termination | jp.isnan(data.qpos).any() | jp.isnan(data.qvel).any()
+        fall_termination | jp.isnan(data.qpos).any() | jp.isnan(data.qvel).any()
     )
 
   def _get_obs(
@@ -431,7 +426,7 @@ class Joystick(bez2_base.Bez2Env):
     )
 
     state = jp.hstack([
-        # noisy_linvel,  # 3
+        noisy_linvel,  # 3
         noisy_gyro,  # 3
         noisy_gravity,  # 3
         info["command"],  # 3
@@ -481,22 +476,24 @@ class Joystick(bez2_base.Bez2Env):
     return {
         # Tracking rewards.
         "tracking_lin_vel": self._reward_tracking_lin_vel(
-            info["command"], self.get_local_linvel(data)
+            info["command"], info["filtered_linvel"]
         ),
         "tracking_ang_vel": self._reward_tracking_ang_vel(
-            info["command"], self.get_gyro(data)
+            info["command"], info["filtered_angvel"]
         ),
         # Base-related rewards.
-        "lin_vel_z": self._cost_lin_vel_z(self.get_global_linvel(data)),
-        "ang_vel_xy": self._cost_ang_vel_xy(self.get_global_angvel(data)),
+        "lin_vel_z": self._cost_lin_vel_z(info["filtered_linvel"]),
+        "ang_vel_xy": self._cost_ang_vel_xy(info["filtered_angvel"]),
         "orientation": self._cost_orientation(self.get_gravity(data)),
-        "base_height": self._cost_base_height(data.qpos[2]),
+        "base_height": self._cost_base_height(data, info),
         # Energy related rewards.
         "torques": self._cost_torques(data.actuator_force),
         "action_rate": self._cost_action_rate(
             action, info["last_act"], info["last_last_act"]
         ),
         "energy": self._cost_energy(data.qvel[6:], data.actuator_force),
+        "dof_acc": self._cost_dof_acc(data.qacc[6:]),
+        "dof_vel": self._cost_dof_vel(data.qvel[6:]),
         # Feet related rewards.
         "feet_slip": self._cost_feet_slip(data, contact, info),
         "feet_clearance": self._cost_feet_clearance(data, info),
@@ -516,6 +513,7 @@ class Joystick(bez2_base.Bez2Env):
         "alive": self._reward_alive(),
         "termination": self._cost_termination(done),
         "stand_still": self._cost_stand_still(info["command"], data.qpos[7:]),
+        "collision": self._cost_collision(data),
         # Pose related rewards.
         "joint_deviation_hip": self._cost_joint_deviation_hip(
             data.qpos[7:], info["command"]
@@ -523,6 +521,7 @@ class Joystick(bez2_base.Bez2Env):
         "joint_deviation_knee": self._cost_joint_deviation_knee(data.qpos[7:]),
         "dof_pos_limits": self._cost_joint_pos_limits(data.qpos[7:]),
         "pose": self._cost_pose(data.qpos[7:]),
+        "feet_distance": self._cost_feet_distance(data, info),
     }
 
   # Tracking rewards.
@@ -530,31 +529,35 @@ class Joystick(bez2_base.Bez2Env):
   def _reward_tracking_lin_vel(
       self,
       commands: jax.Array,
-      local_vel: jax.Array,
+      local_linvel: jax.Array,
   ) -> jax.Array:
-    lin_vel_error = jp.sum(jp.square(commands[:2] - local_vel[:2]))
+    lin_vel_error = jp.sum(jp.square(commands[:2] - local_linvel[:2]))
     return jp.exp(-lin_vel_error / self._config.reward_config.tracking_sigma)
 
   def _reward_tracking_ang_vel(
       self,
       commands: jax.Array,
-      ang_vel: jax.Array,
+      local_angvel: jax.Array,
   ) -> jax.Array:
-    ang_vel_error = jp.square(commands[2] - ang_vel[2])
+    ang_vel_error = jp.square(commands[2] - local_angvel[2])
     return jp.exp(-ang_vel_error / self._config.reward_config.tracking_sigma)
 
   # Base-related rewards.
 
-  def _cost_lin_vel_z(self, global_linvel) -> jax.Array:
-    return jp.square(global_linvel[2])
+  def _cost_lin_vel_z(self, local_linvel) -> jax.Array:
+    return jp.square(local_linvel[2])
 
-  def _cost_ang_vel_xy(self, global_angvel) -> jax.Array:
-    return jp.sum(jp.square(global_angvel[:2]))
+  def _cost_ang_vel_xy(self, local_angvel) -> jax.Array:
+    return jp.sum(jp.square(local_angvel[:2]))
 
   def _cost_orientation(self, torso_zaxis: jax.Array) -> jax.Array:
     return jp.sum(jp.square(torso_zaxis[:2]))
 
-  def _cost_base_height(self, base_height: jax.Array) -> jax.Array:
+  def _cost_base_height(
+      self, data: mjx.Data, info: dict[str, Any]
+  ) -> jax.Array:
+    del info  # Unused.
+    base_height = data.qpos[2]
     return jp.square(
         base_height - self._config.reward_config.base_height_target
     )
@@ -567,7 +570,7 @@ class Joystick(bez2_base.Bez2Env):
   def _cost_energy(
       self, qvel: jax.Array, qfrc_actuator: jax.Array
   ) -> jax.Array:
-    return jp.sum(jp.abs(qvel) * jp.abs(qfrc_actuator))
+    return jp.sum(jp.abs(qvel * qfrc_actuator))
 
   def _cost_action_rate(
       self, act: jax.Array, last_act: jax.Array, last_last_act: jax.Array
@@ -575,6 +578,12 @@ class Joystick(bez2_base.Bez2Env):
     del last_last_act  # Unused.
     c1 = jp.sum(jp.square(act - last_act))
     return c1
+
+  def _cost_dof_acc(self, qacc: jax.Array) -> jax.Array:
+    return jp.sum(jp.square(qacc))
+
+  def _cost_dof_vel(self, qvel: jax.Array) -> jax.Array:
+    return jp.sum(jp.square(qvel))
 
   # Other rewards.
 
@@ -596,6 +605,14 @@ class Joystick(bez2_base.Bez2Env):
 
   def _reward_alive(self) -> jax.Array:
     return jp.array(1.0)
+
+  def _cost_collision(self, data: mjx.Data) -> jax.Array:
+    return jp.array(
+        data.sensordata[
+            self._mj_model.sensor_adr[self._right_foot_left_foot_found_sensor]
+        ]
+        > 0
+    )
 
   # Pose-related rewards.
 
@@ -683,6 +700,20 @@ class Joystick(bez2_base.Bez2Env):
     # cmd_norm = jp.linalg.norm(commands)
     # reward *= cmd_norm > 0.1  # No reward for zero commands.
     return reward
+
+  def _cost_feet_distance(
+      self, data: mjx.Data, info: dict[str, Any]
+  ) -> jax.Array:
+    del info  # Unused.
+    left_foot_pos = data.site_xpos[self._feet_site_id[0]]
+    right_foot_pos = data.site_xpos[self._feet_site_id[1]]
+    base_xmat = data.site_xmat[self._site_id]
+    base_yaw = jp.arctan2(base_xmat[1, 0], base_xmat[0, 0])
+    feet_distance = jp.abs(
+        jp.cos(base_yaw) * (left_foot_pos[1] - right_foot_pos[1])
+        - jp.sin(base_yaw) * (left_foot_pos[0] - right_foot_pos[0])
+    )
+    return jp.clip(0.2 - feet_distance, min=0.0, max=0.1)
 
   def sample_command(self, rng: jax.Array) -> jax.Array:
     rng1, rng2, rng3, rng4 = jax.random.split(rng, 4)

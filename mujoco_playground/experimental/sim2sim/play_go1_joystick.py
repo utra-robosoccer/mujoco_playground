@@ -22,7 +22,7 @@ import onnxruntime as rt
 
 from mujoco_playground._src.locomotion.go1 import go1_constants
 from mujoco_playground._src.locomotion.go1.base import get_assets
-from mujoco_playground.experimental.sim2sim.gamepad_reader import Gamepad
+from mujoco_playground.experimental.sim2sim.keyboard_gamepad import KeyboardGamepad
 
 _HERE = epath.Path(__file__).parent
 _ONNX_DIR = _HERE / "onnx"
@@ -53,7 +53,7 @@ class OnnxController:
     self._counter = 0
     self._n_substeps = n_substeps
 
-    self._joystick = Gamepad(
+    self._joystick = KeyboardGamepad(
         vel_scale_x=vel_scale_x,
         vel_scale_y=vel_scale_y,
         vel_scale_rot=vel_scale_rot,

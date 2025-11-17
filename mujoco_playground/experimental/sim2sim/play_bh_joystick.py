@@ -22,7 +22,7 @@ import onnxruntime as rt
 
 from mujoco_playground._src.locomotion.berkeley_humanoid import berkeley_humanoid_constants
 from mujoco_playground._src.locomotion.berkeley_humanoid.base import get_assets
-from mujoco_playground.experimental.sim2sim.gamepad_reader import Gamepad
+from mujoco_playground.experimental.sim2sim.keyboard_gamepad import KeyboardGamepad
 
 _HERE = epath.Path(__file__).parent
 _ONNX_DIR = _HERE / "onnx"
@@ -58,7 +58,7 @@ class OnnxController:
     self._gait_freq = 1.5
     self._phase_dt = 2 * np.pi * self._gait_freq * ctrl_dt
 
-    self._joystick = Gamepad(
+    self._joystick = KeyboardGamepad(
         vel_scale_x=vel_scale_x,
         vel_scale_y=vel_scale_y,
         vel_scale_rot=vel_scale_rot,
@@ -123,7 +123,7 @@ def load_callback(model=None, data=None):
       vel_scale_y=1.0,
       vel_scale_rot=1.0,
   )
-
+  print(data.qpos[2])
   mujoco.set_mjcb_control(policy.get_control)
 
   return model, data

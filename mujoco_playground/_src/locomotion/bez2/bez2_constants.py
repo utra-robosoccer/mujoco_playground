@@ -25,6 +25,7 @@ FEET_ONLY_FLAT_TERRAIN_XML = (
 FEET_ONLY_ROUGH_TERRAIN_XML = (
     ROOT_PATH / "xmls" / "scene_mjx_feetonly_rough_terrain.xml"
 )
+FEET_ONLY_XML = ROOT_PATH / "xmls" / "scene_mjx_feetonly_flat_terrain.xml"
 
 
 def task_to_xml(task_name: str) -> epath.Path:
@@ -43,6 +44,8 @@ LEFT_FEET_GEOMS = ["left_foot"]
 RIGHT_FEET_GEOMS = ["right_foot"]
 
 FEET_GEOMS = LEFT_FEET_GEOMS + RIGHT_FEET_GEOMS
+
+FEET_POS_SENSOR = [f"{site}_pos" for site in FEET_SITES]
 
 ROOT_BODY = "torso"
 

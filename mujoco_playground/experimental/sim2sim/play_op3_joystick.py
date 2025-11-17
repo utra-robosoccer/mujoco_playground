@@ -20,8 +20,8 @@ import mujoco.viewer as viewer
 import numpy as np
 import onnxruntime as rt
 
-from mujoco_playground._src.locomotion.g1 import g1_constants
-from mujoco_playground._src.locomotion.g1.base import get_assets
+from mujoco_playground._src.locomotion.bez2 import bez2_constants
+from mujoco_playground._src.locomotion.bez2.base import get_assets
 from mujoco_playground.experimental.sim2sim.keyboard_gamepad import KeyboardGamepad
 
 _HERE = epath.Path(__file__).parent
@@ -29,7 +29,7 @@ _ONNX_DIR = _HERE / "onnx"
 
 
 class OnnxController:
-  """ONNX controller for the Go-1 robot."""
+  """ONNX controller for the Booster T1 humanoid."""
 
   def __init__(
       self,
@@ -41,6 +41,7 @@ class OnnxController:
       vel_scale_x: float = 1.0,
       vel_scale_y: float = 1.0,
       vel_scale_rot: float = 1.0,
+
   ):
     self._output_names = ["continuous_actions"]
     self._policy = rt.InferenceSession(
@@ -65,10 +66,11 @@ class OnnxController:
     )
 
   def get_obs(self, model, data) -> np.ndarray:
-    linvel = data.sensor("local_linvel_pelvis").data
-    gyro = data.sensor("gyro_pelvis").data
-    imu_xmat = data.site_xmat[model.site("imu_in_pelvis").id].reshape(3, 3)
+    linvel = data.sensor("local_linvel").data
+    gyro = data.sensor("gyro").data
+    imu_xmat = data.site_xmat[model.site("imu").id].reshape(3, 3)
     gravity = imu_xmat.T @ np.array([0, 0, -1])
+
     joint_angles = data.qpos[7:] - self._default_angles
     joint_velocities = data.qvel[6:]
     phase = np.concatenate([np.cos(self._phase), np.sin(self._phase)])
@@ -101,12 +103,13 @@ def load_callback(model=None, data=None):
   mujoco.set_mjcb_control(None)
 
   model = mujoco.MjModel.from_xml_path(
-      g1_constants.FEET_ONLY_FLAT_TERRAIN_XML.as_posix(),
+      bez2_constants.FEET_ONLY_FLAT_TERRAIN_XML.as_posix(),
+      # op3_constants.FEET_ONLY_XML.as_posix(),
       assets=get_assets(),
   )
   data = mujoco.MjData(model)
 
-  mujoco.mj_resetDataKeyframe(model, data, 1)
+  mujoco.mj_resetDataKeyframe(model, data, 0)
 
   ctrl_dt = 0.02
   sim_dt = 0.002
@@ -114,16 +117,16 @@ def load_callback(model=None, data=None):
   model.opt.timestep = sim_dt
 
   policy = OnnxController(
-      policy_path=(_ONNX_DIR / "g1_policy.onnx").as_posix(),
-      default_angles=np.array(model.keyframe("knees_bent").qpos[7:]),
+      policy_path=(_ONNX_DIR / "op3_policy.onnx").as_posix(),
+      default_angles=np.array(model.keyframe("home").qpos[7:]),
       ctrl_dt=ctrl_dt,
       n_substeps=n_substeps,
-      action_scale=0.5,
-      vel_scale_x=1.5,
-      vel_scale_y=0.8,
-      vel_scale_rot=2 * np.pi,
+      action_scale=0.3,
+      vel_scale_x=1.0,
+      vel_scale_y=1.0,
+      vel_scale_rot=1.0,
   )
-
+  # print(data.qpos[2])
   mujoco.set_mjcb_control(policy.get_control)
 
   return model, data

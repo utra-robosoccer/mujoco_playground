@@ -105,7 +105,7 @@ def load_callback(model=None, data=None):
   mujoco.set_mjcb_control(None)
 
   model = mujoco.MjModel.from_xml_path(
-      t1_constants.FEET_ONLY_ROUGH_TERRAIN_XML.as_posix(),
+      t1_constants.FEET_ONLY_FLAT_TERRAIN_XML.as_posix(),
       assets=get_assets(),
   )
   data = mujoco.MjData(model)
@@ -128,8 +128,8 @@ def load_callback(model=None, data=None):
       vel_scale_rot=1.0,
   )
 
-  mujoco.set_mjcb_control(policy.get_control)
-
+  # mujoco.set_mjcb_control(policy.get_control)
+  print(data.qpos[2])
   return model, data
 
 

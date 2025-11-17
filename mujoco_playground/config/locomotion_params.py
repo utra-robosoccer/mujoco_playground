@@ -118,13 +118,29 @@ def brax_ppo_config(
         policy_obs_key="state",
         value_obs_key="privileged_state",
     )
+  # elif env_name in (
+  #       "Bez2JoystickFlatTerrain",
+  #       "Bez2JoystickRoughTerrain",
+  #   ):
+  #     rl_config.num_timesteps = 200_000_000
+  #     rl_config.num_evals = 20
+  #     rl_config.clipping_epsilon = 0.2
+  #     rl_config.num_resets_per_eval = 1
+  #     rl_config.entropy_cost = 0.005
+  #     rl_config.network_factory = config_dict.create(
+  #         policy_hidden_layer_sizes=(512, 256, 128),
+  #         value_hidden_layer_sizes=(512, 256, 128),
+  #         policy_obs_key="state",
+  #         value_obs_key="privileged_state",
+  #     )
   elif env_name in (
-        "Bez2JoystickFlatTerrain",
-        "Bez2JoystickRoughTerrain",
-    ):
+      "Bez2JoystickFlatTerrain",
+      "Bez2JoystickRoughTerrain",
+  ):
     rl_config.num_timesteps = 150_000_000
     rl_config.num_evals = 15
     rl_config.clipping_epsilon = 0.2
+    rl_config.num_resets_per_eval = 1
     rl_config.entropy_cost = 0.005
     rl_config.network_factory = config_dict.create(
         policy_hidden_layer_sizes=(512, 256, 128),
@@ -233,5 +249,15 @@ def rsl_rl_config(
   if env_name == "Go1JoystickFlatTerrain":
     rl_config.algorithm.learning_rate = 3e-4
     rl_config.algorithm.schedule = "fixed"
-
+  if env_name == "X02JoystickFlatTerrain":
+    rl_config.max_iterations = 1000
+    rl_config.algorithm.entropy_coef = 0.005
+    rl_config.algorithm.num_learning_epochs = 4
+    rl_config.algorithm.num_mini_batches = 32
+    rl_config.algorithm.gamma = 0.97
+    rl_config.algorithm.symmetry_cfg.use_data_augmentation = False
+    rl_config.algorithm.symmetry_cfg.use_mirror_loss = True
+    rl_config.algorithm.symmetry_cfg.data_augmentation_func = \
+      "mujoco_playground.experimental.x02_walking.data_augmentation:get_symmetric_states_x02"
+    rl_config.algorithm.symmetry_cfg.mirror_loss_coeff = 0.3
   return rl_config

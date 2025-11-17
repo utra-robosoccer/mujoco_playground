@@ -26,7 +26,7 @@ from mujoco import mjx
 from mujoco_playground._src import mjx_env
 from mujoco_playground._src.locomotion.bez2 import bez2_constants as consts
 
-
+#
 def get_assets() -> Dict[str, bytes]:
   assets = {}
   mjx_env.update_assets(assets, consts.ROOT_PATH / "xmls", "*.xml")
@@ -36,7 +36,16 @@ def get_assets() -> Dict[str, bytes]:
   mjx_env.update_assets(assets, path, "*.xml")
   mjx_env.update_assets(assets, path / "assets")
   return assets
-
+# def get_assets() -> Dict[str, bytes]:
+#   assets = {}
+#   path = mjx_env.ROOT_PATH / "locomotion" / "bez2" / "xmls"
+#   mjx_env.update_assets(assets, consts.ROOT_PATH / "xmls" / "assets")
+#   mjx_env.update_assets(assets, path, "*.xml")
+#   path = mjx_env.MENAGERIE_PATH / "robotis_op3"
+#   mjx_env.update_assets(assets, path, "*.xml")
+#   mjx_env.update_assets(assets, path / "assets")
+#   mjx_env.update_assets(assets, path / "assets" / "simplified_convex")
+#   return assets
 
 class Bez2Env(mjx_env.MjxEnv):
   """Base class for Bez2 environments."""
@@ -49,9 +58,8 @@ class Bez2Env(mjx_env.MjxEnv):
   ) -> None:
     super().__init__(config, config_overrides)
 
-    self._model_assets = get_assets()
     self._mj_model = mujoco.MjModel.from_xml_string(
-        epath.Path(xml_path).read_text(), assets=self._model_assets
+        epath.Path(xml_path).read_text(), assets=get_assets()
     )
     self._mj_model.opt.timestep = self.sim_dt
 
@@ -60,7 +68,6 @@ class Bez2Env(mjx_env.MjxEnv):
 
     self._mjx_model = mjx.put_model(self._mj_model, impl=self._config.impl)
     self._xml_path = xml_path
-
   # Sensor readings.
 
   def get_gravity(self, data: mjx.Data) -> jax.Array:
@@ -94,6 +101,13 @@ class Bez2Env(mjx_env.MjxEnv):
   def get_gyro(self, data: mjx.Data) -> jax.Array:
     """Return the gyroscope readings in the local frame."""
     return mjx_env.get_sensor_data(self.mj_model, data, consts.GYRO_SENSOR)
+
+  def get_feet_pos(self, data: mjx.Data) -> jax.Array:
+    """Return the position of the feet in the world frame."""
+    return jp.vstack([
+        mjx_env.get_sensor_data(self.mj_model, data, sensor_name)
+        for sensor_name in consts.FEET_POS_SENSOR
+    ])
 
   # Accessors.
 

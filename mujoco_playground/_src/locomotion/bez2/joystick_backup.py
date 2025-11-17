@@ -80,16 +80,16 @@ def default_config() -> config_dict.ConfigDict:
           ),
           tracking_sigma=0.5,
           max_foot_height=0.1,
-          base_height_target= 0.35542180088712744 #0.35542180088712744, 0.243584
+          base_height_target=0.4,
       ),
       push_config=config_dict.create(
           enable=True,
           interval_range=[5.0, 10.0],
           magnitude_range=[0.05, 0.8],
       ),
-      lin_vel_x=[-1.0, 1.0],
-      lin_vel_y=[-1.0, 1.0],
-      ang_vel_yaw=[-1.0, 1.0],
+      lin_vel_x=[-0.5, 0.5],
+      lin_vel_y=[-0.5, 0.5],
+      ang_vel_yaw=[-1.5, 1.5],
       impl="jax",
       nconmax=8 * 8192,
       njmax=29 * 2 + 8 * 4,
@@ -120,9 +120,7 @@ class Joystick(bez2_base.Bez2Env):
     self._default_pose = jp.array(self._mj_model.keyframe("home").qpos[7:])
 
     # Note: First joint is freejoint.
-    # self._lowers, self._uppers = self.mj_model.jnt_range[1:].T
-    self._lowers = self._mj_model.actuator_ctrlrange[:, 0]
-    self._uppers = self._mj_model.actuator_ctrlrange[:, 1]
+    self._lowers, self._uppers = self.mj_model.jnt_range[1:].T
     c = (self._lowers + self._uppers) / 2
     r = self._uppers - self._lowers
     self._soft_lowers = c - 0.5 * r * self._config.soft_joint_pos_limit_factor
@@ -144,18 +142,11 @@ class Joystick(bez2_base.Bez2Env):
 
     # fmt: off
     self._weights = jp.array([
-        # 0.1, 0.1,  # Head.
-        # 0.1, 1.0, 1.0,  # Left arm.
+        0.0, 0.0,  # Head.
+        0.0, 0.0, 0.0,  # Left arm.
         1.0, 1.0, 0.01, 0.01, 1.0, 1.0,  # Left leg.
-        # 0.1, 1.0, 1.0,  # Right arm.
+        0.0, 0.0, 0.0,  # Right arm.
         1.0, 1.0, 0.01, 0.01, 1.0, 1.0,  # Right leg.
-
-        # 0.0, 0.0,  # Head.
-        # 0.0, 0.0, 0.0,  # Left arm.
-        # 0.0, 0.0, 0.0,  # Right arm.
-        # 1.0, 1.0, 0.01, 0.01, 1.0, 1.0,  # Left leg.
-        #
-        # 1.0, 1.0, 0.01, 0.01, 1.0, 1.0,  # Right leg.
     ])
     # fmt: on
 
@@ -208,7 +199,7 @@ class Joystick(bez2_base.Bez2Env):
     # qpos[7:]=*U(0.5, 1.5)
     rng, key = jax.random.split(rng)
     qpos = qpos.at[7:].set(
-        qpos[7:] * jax.random.uniform(key, (12,), minval=0.5, maxval=1.5)
+        qpos[7:] * jax.random.uniform(key, (20,), minval=0.5, maxval=1.5)
     )
 
     # d(xyzrpy)=U(-0.5, 0.5)
@@ -323,7 +314,6 @@ class Joystick(bez2_base.Bez2Env):
     rewards = self._get_reward(
         data, action, state.info, state.metrics, done, first_contact, contact
     )
-
     rewards = {
         k: v * self._config.reward_config.scales[k] for k, v in rewards.items()
     }
@@ -353,29 +343,18 @@ class Joystick(bez2_base.Bez2Env):
     for k, v in rewards.items():
       state.metrics[f"reward/{k}"] = v
     state.metrics["swing_peak"] = jp.mean(state.info["swing_peak"])
-    # jax.debug.print(
-    #     "rew: {r}, done: {d}",
-    #     r=rewards,
-    #     d=done,
-    # )
 
-    # print(f"rew: {reward}")
-    # print(f"done: {done.astype(reward.dtype)}")
     done = done.astype(reward.dtype)
     state = state.replace(data=data, obs=obs, reward=reward, done=done)
     return state
 
   def _get_termination(self, data: mjx.Data) -> jax.Array:
-    # fall_termination = self.get_gravity(data)[-1] < 0.0
-    # contact_termination = data.sensordata[
-    #                           self._mj_model.sensor_adr[self._right_foot_left_foot_found_sensor]
-    #                       ] > 0
-    # return (
-    #     fall_termination | contact_termination | jp.isnan(data.qpos).any() | jp.isnan(data.qvel).any()
-    # )
     fall_termination = self.get_gravity(data)[-1] < 0.0
+    contact_termination = data.sensordata[
+                              self._mj_model.sensor_adr[self._right_foot_left_foot_found_sensor]
+                          ] > 0
     return (
-            fall_termination | jp.isnan(data.qpos).any() | jp.isnan(data.qvel).any()
+        fall_termination | contact_termination | jp.isnan(data.qpos).any() | jp.isnan(data.qvel).any()
     )
 
   def _get_obs(
@@ -431,7 +410,7 @@ class Joystick(bez2_base.Bez2Env):
     )
 
     state = jp.hstack([
-        # noisy_linvel,  # 3
+        noisy_linvel,  # 3
         noisy_gyro,  # 3
         noisy_gravity,  # 3
         info["command"],  # 3

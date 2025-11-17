@@ -1,0 +1,11 @@
+<mujoco model="mesh_to_primitive">
+<asset>
+    <!-- Original mesh, if you still want it for visuals -->
+    <mesh name="geom0_vismesh" file="right_foot_v2_1.stl" scale="0.001 0.001 0.001"/>
+  </asset>
+  <worldbody>
+    <body name="body0" pos="-0.0056695023 -0.05925 -0.37768073">
+      <geom name="geom0" type="box" size="0.092 0.045 0.022587799"/>
+    </body>
+  </worldbody>
+</mujoco>
