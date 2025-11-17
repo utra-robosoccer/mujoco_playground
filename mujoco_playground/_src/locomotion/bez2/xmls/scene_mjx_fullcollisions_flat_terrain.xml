@@ -1,5 +1,5 @@
 <mujoco model="bez2 feetonly flat terrain scene">
-  <include file="bez2_mjx_feetonly.xml"/>
+  <include file="bez2_mjx_full_collision.xml"/>
 <!--    <include file="op3_mjx_feetonly_el.xml"/>-->
 <!--      <compiler angle="radian" meshdir="assets" autolimits="true" assetdir="../assets/"/>-->
     <compiler meshdir="meshes/" angle="radian"  assetdir="../assets/"/>

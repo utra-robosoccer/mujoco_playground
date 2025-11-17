@@ -1,5 +1,6 @@
 cd ~/ros2_ws/src/mujoco_playground/mujoco_playground/_src/locomotion/bez2
 mjx-testspeed --mjcf=xmls/scene_mjx_feetonly_flat_terrain.xml --base_path=.
+mjx-testspeed --mjcf=xmls/scene_mjx_feetonly_rough_terrain.xml --base_path=.
 mjx-testspeed --mjcf=xmls/scene_mjx_fullcollisions_flat_terrain.xml --base_path=.
  ~/mujoco-3.1.1/bin/compile robot.urdf robot2.xml
 python mujoco_playground/experimental/sim2sim/play_bez2_joystick.py
@@ -61,12 +62,35 @@ bez2 only feet  box
  Total realtime factor: 176.27 x
  Total time per step: 11.35 µs
 
-  bez2  only feet box rough
+  bez2  only feet proper box flat
+ Total JIT time: 32.59 s
+ Total simulation time: 1.07 s
+ Total steps per second: 954322
+ Total realtime factor: 1908.64 x
+ Total time per step: 1.05 µs
+
+  bez2  full collision flat
+ Total JIT time: 34.99 s
+ Total simulation time: 6.79 s
+ Total steps per second: 150866
+ Total realtime factor: 301.73 x
+ Total time per step: 6.63 µs
+
+  bez2  only feet mesh rough
  Total JIT time: 43.87 s
  Total simulation time: 11.62 s
  Total steps per second: 88137
  Total realtime factor: 176.27 x
  Total time per step: 11.35 µs
+
+ bez2 only feet box rough
+  Total JIT time: 42.71 s
+ Total simulation time: 4.49 s
+ Total steps per second: 228215
+ Total realtime factor: 456.43 x
+ Total time per step: 4.38 µs
+
+
 
  go1 feet only
 

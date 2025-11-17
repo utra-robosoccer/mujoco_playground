@@ -133,7 +133,7 @@
                   <site name="left_foot"/>
                   <inertial pos="0.0531233 0.0131171 -0.0171875" quat="0.0416633 0.697462 0.0260306 0.714936" mass="0.0392927" diaginertia="0.000144264 0.000123855 2.58809e-05"/>
                   <joint  class="mx64" name="left_ankle_roll" pos="0 0 0" axis="1 0 0" />
-            <geom  class="collision" size="0.10247 0.045 0.02307" pos="0.0595 0.018 -0.00871" type="box" rgba="0.364706 0.439216 0.509804 1"/>
+            <geom  class="collision" size="0.092 0.045 0.02259" pos="0.04903 0.018 -0.00918" type="box" rgba="0.364706 0.439216 0.509804 1"/>
 
                     <geom class="visual" name="left_foot" pos="0.054731 -0.04125 0.3685" quat="1 0 0 0" type="mesh" rgba="0.364706 0.439216 0.509804 1" mesh="left_foot_v10_1"/>
                 </body>
